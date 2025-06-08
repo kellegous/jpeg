@@ -45,37 +45,6 @@ func expectDetritusOf(n int) func(t *testing.T, chunk Chunk) {
 	}
 }
 
-/**
-=== RUN   TestParse/jpeg444.jpg
-jpeg444.jpg
-SOI: 2 bytes
-APP0: 18 bytes
-APP1: 70 bytes
-APP2: 70 bytes
-APP3: 70 bytes
-APP4: 70 bytes
-APP5: 70 bytes
-APP6: 70 bytes
-APP7: 70 bytes
-APP8: 70 bytes
-APP9: 70 bytes
-APP10: 70 bytes
-APP11: 70 bytes
-APP12: 70 bytes
-APP13: 70 bytes
-APP14: 70 bytes
-APP15: 70 bytes
-SOF0: 19 bytes
-DQT: 69 bytes
-DQT: 69 bytes
-DQT: 69 bytes
-DHT: 420 bytes
-SOS: 14 bytes
-entropy-coded data: 3934 bytes
-EOI: 2 bytes
-detritus: 1 bytes
-**/
-
 func TestParse(t *testing.T) {
 	tests := []struct {
 		Filename string
