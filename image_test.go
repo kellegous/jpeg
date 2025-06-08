@@ -1,8 +1,10 @@
 package jpeg
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -161,4 +163,49 @@ func TestParse(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestStrip(t *testing.T) {
+	tests := []string{
+		"JPG_Test.jpg",
+		"jpeg400jfif.jpg",
+		"jpeg420exif.jpg",
+		"jpeg422jfif.jpg",
+		"jpeg444.jpg",
+	}
+
+	for _, filename := range tests {
+		t.Run(filename, func(t *testing.T) {
+			// Read and parse original file
+			data, err := os.ReadFile(filepath.Join("testdata", filename))
+			if err != nil {
+				t.Fatalf("failed to read test file: %v", err)
+			}
+
+			img, err := Parse(data)
+			if err != nil {
+				t.Fatalf("failed to parse image: %v", err)
+			}
+
+			// Strip metadata
+			stripped := img.Strip()
+
+			// Read expected stripped file
+			expectedData, err := os.ReadFile(filepath.Join("testdata", strings.TrimSuffix(filename, ".jpg")+".stripped.jpg"))
+			if err != nil {
+				t.Fatalf("failed to read stripped test file: %v", err)
+			}
+
+			// Compare bytes
+			var buf bytes.Buffer
+			if _, err := stripped.Write(&buf); err != nil {
+				t.Fatalf("failed to write stripped image: %v", err)
+			}
+
+			if !bytes.Equal(buf.Bytes(), expectedData) {
+				t.Errorf("stripped image does not match expected output")
+			}
+		})
+	}
+
 }
