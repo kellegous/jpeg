@@ -14,7 +14,7 @@ type Image []Chunk
 func (i Image) Strip() Image {
 	var slim Image
 	for _, chunk := range i {
-		if seg := chunk.AsSegment(); seg != nil {
+		if seg, ok := chunk.(*Segment); ok {
 			switch seg.Type() {
 			case APP0, APP1, APP2, APP3, APP4, APP5, APP6, APP7, APP8, APP9, APP10, APP11, APP12, APP13, APP14, APP15, COM:
 				continue
@@ -31,7 +31,7 @@ func (i Image) Strip() Image {
 func (i Image) Write(w io.Writer) (int, error) {
 	var t int
 	for _, chunk := range i {
-		n, err := w.Write(chunk)
+		n, err := w.Write(chunk.Data())
 		t += n
 		if err != nil {
 			return t, err
@@ -52,9 +52,25 @@ func Parse(b []byte) (Image, error) {
 		}
 
 		x := SegmentType(b[1])
-		if x == SOI || x == EOI {
-			// SOI and EOI do not have a length field.
-			chunks = append(chunks, Chunk(b[:2]))
+		if x == EOI {
+			chunks = append(chunks, &Segment{data: b[:2]})
+			b = b[2:]
+
+			if len(b) == 0 {
+				break
+			}
+
+			// Apple's Preview uses a strategy where tone maps are appended as a second complete
+			// JPEG image following the initial EOI. Most parsers stop at the EOI, but that
+			// strategy means you potentially miss the entire second image. So if we find that
+			// there are bytes remaining, look ahead to see if we have an SOI. Otherwise, we return
+			// it as detritus (trailing junk that would otherwise be ignored).
+			if len(b) < 2 || (b[0] != 0xff && b[1] != byte(SOI)) {
+				chunks = append(chunks, &Detritus{data: b})
+				break
+			}
+		} else if x == SOI {
+			chunks = append(chunks, &Segment{data: b[:2]})
 			b = b[2:]
 		} else if x >= RST0 && x <= RST7 {
 			// RST segments are only allowed in the entropy-coded data.
@@ -63,7 +79,7 @@ func Parse(b []byte) (Image, error) {
 			return nil, errors.New("unexpected end of file")
 		} else {
 			n := binary.BigEndian.Uint16(b[2:])
-			chunks = append(chunks, Chunk(b[:n+2]))
+			chunks = append(chunks, &Segment{data: b[:n+2]})
 			b = b[n+2:]
 
 			if SegmentType(x) == SOS {
@@ -71,7 +87,7 @@ func Parse(b []byte) (Image, error) {
 				if n == -1 {
 					return nil, errors.New("invalid entropy encoded data")
 				}
-				chunks = append(chunks, Chunk(b[:n]))
+				chunks = append(chunks, &EntropyCodedData{data: b[:n]})
 				b = b[n:]
 			}
 		}

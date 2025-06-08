@@ -1,20 +1,24 @@
 package jpeg
 
-type Segment []byte
+type Segment struct {
+	data []byte
+}
 
 type SegmentType byte
 
 func (s Segment) Type() SegmentType {
-	return SegmentType(s[1])
+	return SegmentType(s.data[1])
 }
 
 func (s Segment) Len() int {
-	return len(s)
+	return len(s.data)
 }
 
 func (s Segment) Data() []byte {
-	return s
+	return s.data
 }
+
+func (s Segment) isChunk() {}
 
 // TODO(kellegous): DAC, SIZ?
 const (
