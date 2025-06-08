@@ -42,7 +42,7 @@ func (i Image) Write(w io.Writer) (int, error) {
 
 // Parse parses a JPEG image into chunks, either a segment or entropy-coded data.
 func Parse(b []byte) (Image, error) {
-	chunks := make([]Chunk, 4)
+	chunks := make([]Chunk, 0, 4)
 	for len(b) > 0 {
 		// we should begin with a segment marker
 		if b[0] != 0xff {
