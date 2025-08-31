@@ -7,6 +7,7 @@ import (
 	"io"
 )
 
+// Image is a series of chunks.
 type Image []Chunk
 
 // Strip removes all segments of the JPEG where non-essential metadata is stored. This includes all APPn segments and any COM segment. This
@@ -40,7 +41,7 @@ func (i Image) Write(w io.Writer) (int, error) {
 	return t, nil
 }
 
-// Parse parses a JPEG image into chunks, either a segment or entropy-coded data.
+// Parse parses a JPEG image into a series of chunks. Chunks can be either a segment, entropy-coded data. or detritus (trailing junk that would otherwise be ignored).
 func Parse(b []byte) (Image, error) {
 	chunks := make([]Chunk, 0, 4)
 	for len(b) > 0 {

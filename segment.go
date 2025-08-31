@@ -1,9 +1,11 @@
 package jpeg
 
+// Segment is a region within a JPEG image that contains a marker indicating the type of data it contains.
 type Segment struct {
 	data []byte
 }
 
+// SegmentType is a marker indicating the type of data contained in a segment.
 type SegmentType byte
 
 func (s Segment) Type() SegmentType {
@@ -22,22 +24,32 @@ func (s Segment) isChunk() {}
 
 // TODO(kellegous): DAC, SIZ?
 const (
-	SOI   SegmentType = 0xd8
-	SOF0  SegmentType = 0xc0
-	SOF1  SegmentType = 0xc1
-	SOF2  SegmentType = 0xc2
-	DHT   SegmentType = 0xc4
-	DQT   SegmentType = 0xdb
-	DRI   SegmentType = 0xdd
-	SOS   SegmentType = 0xda
-	RST0  SegmentType = 0xd0
-	RST1  SegmentType = 0xd1
-	RST2  SegmentType = 0xd2
-	RST3  SegmentType = 0xd3
-	RST4  SegmentType = 0xd4
-	RST5  SegmentType = 0xd5
-	RST6  SegmentType = 0xd6
-	RST7  SegmentType = 0xd7
+	// Start of Image
+	SOI SegmentType = 0xd8
+	// Start of Frame (baseline)
+	SOF0 SegmentType = 0xc0
+	// Start of Frame (progressive)
+	SOF1 SegmentType = 0xc1
+	// Start of Frame (lossless)
+	SOF2 SegmentType = 0xc2
+	// Huffman Table
+	DHT SegmentType = 0xc4
+	// Quantization Table
+	DQT SegmentType = 0xdb
+	// Restart Interval
+	DRI SegmentType = 0xdd
+	// Start of Scan
+	SOS SegmentType = 0xda
+	// Restart
+	RST0 SegmentType = 0xd0
+	RST1 SegmentType = 0xd1
+	RST2 SegmentType = 0xd2
+	RST3 SegmentType = 0xd3
+	RST4 SegmentType = 0xd4
+	RST5 SegmentType = 0xd5
+	RST6 SegmentType = 0xd6
+	RST7 SegmentType = 0xd7
+	// Application-specific
 	APP0  SegmentType = 0xe0
 	APP1  SegmentType = 0xe1
 	APP2  SegmentType = 0xe2
@@ -54,8 +66,10 @@ const (
 	APP13 SegmentType = 0xed
 	APP14 SegmentType = 0xee
 	APP15 SegmentType = 0xef
-	COM   SegmentType = 0xfe
-	EOI   SegmentType = 0xd9
+	// Comment
+	COM SegmentType = 0xfe
+	// End of Image
+	EOI SegmentType = 0xd9
 )
 
 func (t SegmentType) Name() string {
